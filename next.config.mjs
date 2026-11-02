@@ -1,6 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  // The approved site design lives in public/index.html and is served at "/".
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/",
+          destination: "/index.html",
+        },
+      ],
+    };
+  },
   async headers() {
     return [
       {

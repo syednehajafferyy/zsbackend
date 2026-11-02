@@ -29,7 +29,10 @@ export const route = (fn: Fn, opts: { admin?: boolean } = {}) => async (req: Nex
     const res = r instanceof Response ? r : NextResponse.json(r);
     Object.entries(corsHeaders).forEach(([k, v]) => res.headers.set(k, v));
     return res;
-  } catch (e) {
+  } catch (e: unknown) {
+    const pathname = req.nextUrl?.pathname || req.url;
+    console.error(`[API Handler Error] ${req.method} ${pathname}:`, e);
+
     if (e instanceof ZodError) {
       return NextResponse.json(
         { error: "Please check the highlighted fields.", fields: e.flatten().fieldErrors },
@@ -39,15 +42,19 @@ export const route = (fn: Fn, opts: { admin?: boolean } = {}) => async (req: Nex
     if (e instanceof HttpError) {
       return NextResponse.json({ error: e.message }, { status: e.status, headers: corsHeaders });
     }
-    const code = (e as { code?: string }).code;
+    const code = (e as { code?: string })?.code;
     if (code === "P2002") {
       return NextResponse.json({ error: "That name already exists." }, { status: 409, headers: corsHeaders });
     }
     if (code === "P2025") {
       return NextResponse.json({ error: "Not found." }, { status: 404, headers: corsHeaders });
     }
-    console.error(e);
-    return NextResponse.json({ error: "Server error. Please try again." }, { status: 500, headers: corsHeaders });
+
+    const errorMessage = e instanceof Error ? e.message : "Internal server error";
+    return NextResponse.json(
+      { error: "Server error. Please try again.", details: process.env.NODE_ENV !== "production" ? errorMessage : undefined },
+      { status: 500, headers: corsHeaders }
+    );
   }
 };
 
