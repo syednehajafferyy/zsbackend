@@ -1,10 +1,19 @@
-generator client { provider = "prisma-client-js" }
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-enum InquiryStatus { PENDING READ RESOLVED }
+
+enum InquiryStatus {
+  PENDING
+  READ
+  RESOLVED
+}
+
 model Admin {
   id        String   @id @default(cuid())
   name      String
@@ -12,6 +21,7 @@ model Admin {
   password  String
   createdAt DateTime @default(now())
 }
+
 model Category {
   id          String    @id @default(cuid())
   name        String    @unique
@@ -19,6 +29,7 @@ model Category {
   description String?
   products    Product[]
 }
+
 model Product {
   id          String    @id @default(cuid())
   name        String
@@ -30,8 +41,10 @@ model Product {
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
   @@index([published, categoryId])
 }
+
 model Inquiry {
   id        String        @id @default(cuid())
   name      String
@@ -41,5 +54,6 @@ model Inquiry {
   message   String
   status    InquiryStatus @default(PENDING)
   createdAt DateTime      @default(now())
+
   @@index([status, createdAt])
 }
