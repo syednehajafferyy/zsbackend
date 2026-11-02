@@ -1,0 +1,12 @@
+CREATE TYPE "InquiryStatus" AS ENUM ('PENDING', 'READ', 'RESOLVED');
+CREATE TABLE "Admin" ("id" TEXT NOT NULL, "name" TEXT NOT NULL, "email" TEXT NOT NULL, "password" TEXT NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "Admin_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Category" ("id" TEXT NOT NULL, "name" TEXT NOT NULL, "slug" TEXT NOT NULL, "description" TEXT, CONSTRAINT "Category_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Product" ("id" TEXT NOT NULL, "name" TEXT NOT NULL, "slug" TEXT NOT NULL, "description" TEXT NOT NULL, "image" TEXT, "published" BOOLEAN NOT NULL DEFAULT false, "categoryId" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, CONSTRAINT "Product_pkey" PRIMARY KEY ("id"));
+CREATE TABLE "Inquiry" ("id" TEXT NOT NULL, "name" TEXT NOT NULL, "email" TEXT NOT NULL, "phone" TEXT NOT NULL, "subject" TEXT NOT NULL, "message" TEXT NOT NULL, "status" "InquiryStatus" NOT NULL DEFAULT 'PENDING', "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, CONSTRAINT "Inquiry_pkey" PRIMARY KEY ("id"));
+CREATE UNIQUE INDEX "Admin_email_key" ON "Admin"("email");
+CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
+CREATE UNIQUE INDEX "Category_slug_key" ON "Category"("slug");
+CREATE UNIQUE INDEX "Product_slug_key" ON "Product"("slug");
+CREATE INDEX "Product_published_categoryId_idx" ON "Product"("published", "categoryId");
+CREATE INDEX "Inquiry_status_createdAt_idx" ON "Inquiry"("status", "createdAt");
+ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
